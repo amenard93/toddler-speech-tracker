@@ -1,0 +1,75 @@
+# ============================================
+# BACKEND - Sensitive Configuration
+# ============================================
+toddlerspeechtracker-gradle/application.properties
+toddlerspeechtracker-gradle/src/main/resources/application.properties
+toddlerspeechtracker-gradle/src/main/resources/application-*.properties
+toddlerspeechtracker-gradle/src/main/resources/credentials/
+**/google-service-account.json
+**/credentials/*.json
+
+# ============================================
+# FRONTEND - Environment Files
+# ============================================
+toddlerspeechtracker-frontend/.env
+toddlerspeechtracker-frontend/.env.local
+toddlerspeechtracker-frontend/.env.development.local
+toddlerspeechtracker-frontend/.env.test.local
+toddlerspeechtracker-frontend/.env.production.local
+
+# ============================================
+# BACKEND - Build Files
+# ============================================
+toddlerspeechtracker-gradle/.gradle/
+toddlerspeechtracker-gradle/build/
+toddlerspeechtracker-gradle/out/
+toddlerspeechtracker-gradle/target/
+toddlerspeechtracker-gradle/bin/
+
+# ============================================
+# FRONTEND - Build Files
+# ============================================
+toddlerspeechtracker-frontend/node_modules/
+toddlerspeechtracker-frontend/build/
+toddlerspeechtracker-frontend/dist/
+toddlerspeechtracker-frontend/coverage/
+
+# ============================================
+# IDE Files
+# ============================================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.classpath
+.project
+.settings/
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# Temporary Files
+# ============================================
+*.tmp
+*.bak
+*.swp
+*~
