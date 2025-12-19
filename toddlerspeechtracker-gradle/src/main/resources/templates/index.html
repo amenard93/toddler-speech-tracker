@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Toddler Speech Tracker</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; margin: 20px; }
+        button { padding: 10px 16px; font-size: 16px; margin-right: 10px; }
+        input { padding: 8px; font-size: 16px; margin-right: 10px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; font-size: 14px; }
+        th { background: #f4f4f4; }
+        .section { margin-top: 24px; }
+        .button-group { margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; }
+        #status { margin-top: 10px; font-weight: bold; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+<h1>Toddler Speech Tracker</h1>
+<p>Enter a Child ID and click a button to interact with Google Sheets data.</p>
+
+<div class="input-group">
+    <label for="childIdInput">Child ID:</label>
+    <input type="number" id="childIdInput" placeholder="Enter child ID" value="1" min="1" />
+</div>
+
+<div class="button-group">
+    <button id="fetchBtn">Fetch from Google Sheets (Display Only)</button>
+    <button id="syncBtn">Sync from Google Sheets (Save to Database)</button>
+</div>
+
+<div id="status"></div>
+<div id="output"></div>
+
+<script>
+    const fetchBtn = document.getElementById('fetchBtn');
+    const syncBtn = document.getElementById('syncBtn');
+    const childIdInput = document.getElementById('childIdInput');
+    const status = document.getElementById('status');
+    const output = document.getElementById('output');
+
+    fetchBtn.addEventListener('click', async () => {
+        const childId = childIdInput.value;
+        if (!childId || childId < 1) {
+            status.textContent = 'Please enter a valid Child ID';
+            status.className = 'error';
+            return;
+        }
+
+        status.textContent = 'Fetching from Google Sheets...';
+        status.className = '';
+        output.innerHTML = '';
+
+        try {
+            const resp = await fetch(`/api/fetch?childId=${childId}`, { method: 'POST' });
+            if (!resp.ok) {
+                const text = await resp.text();
+                status.textContent = 'Error: ' + text;
+                status.className = 'error';
+                return;
+            }
+            const data = await resp.json();
+            status.textContent = 'Fetch complete! Data displayed below (not saved to database).';
+            status.className = 'success';
+            renderResult(data);
+        } catch (err) {
+            status.textContent = 'Network error: ' + err.message;
+            status.className = 'error';
+        }
+    });
+
+    syncBtn.addEventListener('click', async () => {
+        const childId = childIdInput.value;
+        if (!childId || childId < 1) {
+            status.textContent = 'Please enter a valid Child ID';
+            status.className = 'error';
+            return;
+        }
+
+        status.textContent = 'Syncing to database...';
+        status.className = '';
+        output.innerHTML = '';
+
+        try {
+            const resp = await fetch(`/api/sync?childId=${childId}`, { method: 'POST' });
+            if (!resp.ok) {
+                const text = await resp.text();
+                status.textContent = 'Error: ' + text;
+                status.className = 'error';
+                return;
+            }
+            const data = await resp.json();
+            status.textContent = 'Sync complete! Data saved to database and displayed below.';
+            status.className = 'success';
+            renderResult(data);
+        } catch (err) {
+            status.textContent = 'Network error: ' + err.message;
+            status.className = 'error';
+        }
+    });
+
+    function renderResult(data) {
+        output.innerHTML = '';
+
+        if (data.words && data.words.length) {
+            output.appendChild(createSection('Words',
+                ['word','signed','signedDate','verbal','verbalDate','actualPronunciation','notes','learningSource'],
+                data.words));
+        }
+
+        if (data.phrases && data.phrases.length) {
+            output.appendChild(createSection('Phrases',
+                ['phrase','dateSaid','funnyRating','cuteRating','learningSource','notes'],
+                data.phrases));
+        }
+
+        if (data.songs && data.songs.length) {
+            output.appendChild(createSection('Songs',
+                ['songTitle','dateFirstSang','source','notes'],
+                data.songs));
+        }
+
+        if (data.letters && data.letters.length) {
+            output.appendChild(createSection('Letters',
+                ['letters','recognized','recognizedDate','soundItOut','soundItOutDate'],
+                data.letters));
+        }
+    }
+
+    function createSection(title, columns, rows) {
+        const container = document.createElement('div');
+        container.className = 'section';
+        const h = document.createElement('h2');
+        h.textContent = title + ' (' + rows.length + ' records)';
+        container.appendChild(h);
+
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tr = document.createElement('tr');
+        columns.forEach(c => {
+            const th = document.createElement('th');
+            th.textContent = c;
+            tr.appendChild(th);
+        });
+        thead.appendChild(tr);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        rows.forEach(r => {
+            const tr2 = document.createElement('tr');
+            columns.forEach(c => {
+                const td = document.createElement('td');
+                let val = r[c];
+                if (val === null || val === undefined) val = '';
+                // Display boolean values as Yes/No
+                if (typeof val === 'boolean') {
+                    val = val ? 'Yes' : 'No';
+                }
+                td.textContent = val;
+                tr2.appendChild(td);
+            });
+            tbody.appendChild(tr2);
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+        return container;
+    }
+</script>
+</body>
+</html>
